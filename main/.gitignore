@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.log.*
+config.py
+run.py
+.idea/
+testdf.py

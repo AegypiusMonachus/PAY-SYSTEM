@@ -1,0 +1,49 @@
+from datetime import time
+
+from logging import Formatter
+from logging.handlers import TimedRotatingFileHandler
+
+
+class Config:
+	SECRET_KEY = '1DFD219CEA90DC5A32DBD6842837E3C3'
+
+	@staticmethod
+	def init_app(app):
+		formatter = Formatter('%(asctime)s | %(levelname)s | %(filename)s | %(message)s')
+		handler = TimedRotatingFileHandler(filename='logs/default.log', when='MIDNIGHT', backupCount=7, atTime=time())
+		handler.setFormatter(formatter)
+
+		from flask.logging import default_handler
+		app.logger.removeHandler(default_handler)
+		app.logger.addHandler(handler)
+		app.logger.setLevel('INFO')
+
+
+class DebuggingConfig(Config):
+	DEBUG = True
+
+	AUTO_CANCEL_SECONDS = 300
+	AUTO_CANCEL_CALLBACK = ''
+
+	SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@104.155.233.75:3306/database'
+	SQLALCHEMY_COMMIT_ON_TEATDOWN = False
+	SQLALCHEMY_ECHO = True
+	SQLALCHEMY_POOL_SIZE = 5
+	SQLALCHEMY_POOL_TIMEOUT = 10
+	SQLALCHEMY_POOL_RECYCLE = 7200
+	SQLALCHEMY_MAX_OVERFLOW = 5
+
+
+class TestingConfig(Config):
+	DEBUG = False
+
+
+class ProductionConfig(Config):
+	DEBUG = False
+
+
+config_mapping = {
+	'DEBUGGING': DebuggingConfig,
+	'TESTING': TestingConfig,
+	'PRODUCTION': ProductionConfig,
+}

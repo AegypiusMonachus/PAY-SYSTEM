@@ -1,0 +1,91 @@
+import os
+from datetime import time
+from logging import Formatter
+from logging.handlers import TimedRotatingFileHandler
+
+
+class Config:
+	SECRET_KEY = 'F65EE632DEE7EDB2171623EF15481EE4'
+
+	STATIC_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app/static')
+
+	MERCHANT_URI = "http://manage.devqp.info/payment/auth/merchant/passport"
+	ADMIN_URI = "http://manage.devqp.info/payment/auth/merchant/passport"
+	OAUTH2_SERVICE_URI = 'http://manage.devqp.info'
+	DEFAULT_AGENT ='9518'
+	DEFAULT_TRADE_TIME = 300
+	PAY_VIEW_URL = 'http://9518.devqp.info/static/payView.html?temp_code='
+	PAY_VIEW_TTL = 300
+
+	@staticmethod
+	def init_app(app):
+		formatter = Formatter('%(asctime)s | %(levelname)s | %(filename)s | %(message)s')
+		handler = TimedRotatingFileHandler(filename='logs/default.log', when='MIDNIGHT', backupCount=7, atTime=time())
+		handler.setFormatter(formatter)
+
+		from flask.logging import default_handler
+		app.logger.removeHandler(default_handler)
+		app.logger.addHandler(handler)
+		app.logger.setLevel('INFO')
+
+
+class DebuggingConfig(Config):
+	DEBUG = True
+
+	SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://username:password@localhost:3306/database'
+	SQLALCHEMY_COMMIT_ON_TEATDOWN = False
+	SQLALCHEMY_ECHO = True
+	SQLALCHEMY_POOL_SIZE = 5
+	SQLALCHEMY_POOL_TIMEOUT = 10
+	SQLALCHEMY_POOL_RECYCLE = 7200
+	SQLALCHEMY_MAX_OVERFLOW = 5
+
+	REDIS_HOST = 'localhost'
+	REDIS_PORT = 6379
+	REDIS_DB = 0
+	REDIS_PASS = None
+	REDIS_POOLSIZE = 10
+	REDIS_DECODE_RESPONSES = True
+
+
+class TestingConfig(Config):
+	DEBUG = False
+
+	SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://username:password@localhost:3306/database'
+	SQLALCHEMY_COMMIT_ON_TEATDOWN = False
+	SQLALCHEMY_ECHO = False
+	SQLALCHEMY_POOL_SIZE = 5
+	SQLALCHEMY_POOL_TIMEOUT = 10
+	SQLALCHEMY_POOL_RECYCLE = 7200
+	SQLALCHEMY_MAX_OVERFLOW = 5
+
+	REDIS_HOST = 'localhost'
+	REDIS_PORT = 6379
+	REDIS_DB = 0
+	REDIS_PASS = None
+	REDIS_DECODE_RESPONSES = True
+
+
+class ProductionConfig(Config):
+	DEBUG = False
+
+	SQLALCHEMY_DATABASE_URI = ''
+	SQLALCHEMY_COMMIT_ON_TEATDOWN = False
+	SQLALCHEMY_ECHO = False
+	SQLALCHEMY_POOL_SIZE = 5
+	SQLALCHEMY_POOL_TIMEOUT = 10
+	SQLALCHEMY_POOL_RECYCLE = 7200
+	SQLALCHEMY_MAX_OVERFLOW = 5
+
+	REDIS_HOST = 'localhost'
+	REDIS_PORT = 6379
+	REDIS_DB = 0
+	REDIS_PASSWORD = None
+	REDIS_DECODE_RESPONSES = True
+
+
+config_mapping = {
+	'DEBUGGING': DebuggingConfig,
+	'TESTING': TestingConfig,
+	'PRODUCTION': ProductionConfig,
+}
